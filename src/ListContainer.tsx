@@ -5,24 +5,33 @@ import { List } from './List'
 const singleStoryURL = 'https://hacker-news.firebaseio.com/v0/item/'
 const newStoriesURL = 'https://hacker-news.firebaseio.com/v0/newstories.json'
 
+interface Story {
+  id: number,
+  title: string
+}
+
 export const ListContainer: React.FC = () => {
-  const [id, setId] = useState(0)
-  const [title, setTitle] = useState('')
+  const initialValue: Story[] = []
+  const [data, setData] = useState(initialValue)
 
   useEffect(() => {
     const fetchData = async () => {
-      const newStories = await axios(newStoriesURL)
-      const topStoryId = newStories.data[0]
-      const topStoryData = await axios(`${singleStoryURL}${topStoryId}.json`)
+      const newStoriesIdList = await axios(newStoriesURL)
+      const topTenStoriesIdList = newStoriesIdList.data.slice(0, 10)
+      
+      topTenStoriesIdList.forEach(async (id: number) => {
+        const storyDataObj = await axios(`${singleStoryURL}${id}.json`)
+        const idAndTitleObj = { id: storyDataObj.data.id, title: storyDataObj.data.title }
 
-      setId(topStoryData.data.id)
-      setTitle(topStoryData.data.title)
+        setData((data: Story[]): Story[] => [...data, idAndTitleObj])
+      })
+
     }
 
     fetchData()
   }, [])
 
   return (
-    <List list={[{ id, title }]} />
-  )
+    <List list={data} />
+  );
 }
