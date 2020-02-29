@@ -13,7 +13,7 @@ export const List: React.FC<Props> = ({ list }) => {
   return (
     <div>
       <ul>
-        {list.map(item =>
+        {!!list && list.map(item =>
           <li data-testid="list-item" key={item.id}>
             {item.title}
           </li>

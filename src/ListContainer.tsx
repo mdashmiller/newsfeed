@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { List } from './List'
+
+const singleStoryURL = 'https://hacker-news.firebaseio.com/v0/item/'
+const newStoriesURL = 'https://hacker-news.firebaseio.com/v0/newstories.json'
 
 export const ListContainer: React.FC = () => {
-  const [data, setData] = useState(null)
-  // const [error, setError] = useState(null)
+  const [id, setId] = useState(0)
+  const [title, setTitle] = useState('')
 
-  // useEffect(() => {
-  //   axios.get('https://hacker-news.firebaseio.com/v0/item/8863.json')
-  //     .then(res => {
-  //       setData(res.data)
-  //       setError(null)
-  //       console.log(res)
-  //     })
-  //     .catch(err => {
-  //       setError(err)
-  //       console.log(err)
-  //     })
-  // }, [])
+  useEffect(() => {
+    const fetchData = async () => {
+      const newStories = await axios(newStoriesURL)
+      const topStoryId = newStories.data[0]
+      const topStoryData = await axios(`${singleStoryURL}${topStoryId}.json`)
 
-  // if (error) return <div>Error :(</div>
+      setId(topStoryData.data.id)
+      setTitle(topStoryData.data.title)
+    }
 
-  if (!data) return <div>Loading...</div>
+    fetchData()
+  }, [])
 
   return (
-    <div>
-
-    </div>
+    <List list={[{ id, title }]} />
   )
 }
