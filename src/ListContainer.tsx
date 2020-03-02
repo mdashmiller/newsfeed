@@ -7,31 +7,73 @@ const newStoriesURL = 'https://hacker-news.firebaseio.com/v0/newstories.json'
 
 interface Story {
   id: number,
-  title: string
+  title: string, // TODO: add conditional render for title: undefined
+  url?: string
 }
 
+const initialStoriesValue: Story[] = []
+const initialIdsValue: number[] = []
+
 export const ListContainer: React.FC = () => {
-  const initialValue: Story[] = []
-  const [data, setData] = useState(initialValue)
+  const [newStoriesIds, setNewStoriesIds] = useState(initialIdsValue)
+  const [storyData, setStoryData] = useState(initialStoriesValue)
+  const [loadMore, setLoadMore] = useState(false)
+  const [numOfStories, setNumOfStories] = useState(0)
+  const [loading, setLoading] = useState(false)
+  // TODO: error state
 
   useEffect(() => {
-    const fetchData = async () => {
-      const newStoriesIdList = await axios(newStoriesURL)
-      const topTenStoriesIdList = newStoriesIdList.data.slice(0, 10)
-      
-      topTenStoriesIdList.forEach(async (id: number) => {
-        const storyDataObj = await axios(`${singleStoryURL}${id}.json`)
-        const idAndTitleObj = { id: storyDataObj.data.id, title: storyDataObj.data.title }
+    const fetchTopStory = async () => { // TODO: add error handling
+      setLoading(true)
 
-        setData((data: Story[]): Story[] => [...data, idAndTitleObj])
-      })
+      const listOfStoryIds = await axios(newStoriesURL)
 
+      setNewStoriesIds(listOfStoryIds.data)
+
+      const topStoryData = await axios(`${singleStoryURL}${listOfStoryIds.data[0]}.json`)
+
+      setNumOfStories(1)
+      setStoryData([{
+        id: topStoryData.data.id,
+        title: topStoryData.data.title,
+        url: topStoryData.data.url
+      }])
+      setLoading(false)
     }
-
-    fetchData()
+    
+    fetchTopStory()
   }, [])
 
+  if (loadMore) {
+    const fetchNextTenStories = async () => { // TODO: add error handling
+      const nextTenIds: number[] = newStoriesIds.slice(numOfStories, numOfStories + 10)
+
+      nextTenIds.forEach(async (id: number) => {
+        const nextStoryData = await axios(`${singleStoryURL}${id}.json`)
+        const editedStoryData: Story = {
+          id: nextStoryData.data.id,
+          title: nextStoryData.data.title,
+          url: nextStoryData.data.url
+        }
+
+        setLoadMore(false)
+        setNumOfStories(numOfStories + 10)
+        setStoryData((data: Story[]): Story[] => [...data, editedStoryData])
+      })
+    }
+
+    fetchNextTenStories()
+  }
+
   return (
-    <List list={data} />
+    <>
+      <h1 style={{ 'marginLeft': '22px' }}>News</h1>
+      <List
+        list={storyData}
+        setLoadMore={setLoadMore}
+        loading={loading}
+        loadMore={loadMore}
+      />
+    </>
   );
 }
