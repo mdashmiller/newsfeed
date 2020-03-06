@@ -12,7 +12,7 @@ interface Props {
   initialLoadError: boolean,
   loadingMore: boolean,
   loadingMoreError: boolean,
-  setMoreStoriesRequested: any // TODO: declare funtion as prop in ts
+  fetchMoreStories: any // TODO: declare funtion as prop in ts
 }
 
 export const Headlines: React.FC<Props> = ({
@@ -21,7 +21,7 @@ export const Headlines: React.FC<Props> = ({
   initialLoadError,
   loadingMore,
   loadingMoreError,
-  setMoreStoriesRequested
+  fetchMoreStories
 }) => {
 
   const buttonText = loadingMore ? 'Loading...' : 'Load More Stories'
@@ -47,7 +47,7 @@ export const Headlines: React.FC<Props> = ({
             Something went wrong :(
           </p>
           <button
-            onClick={() => setMoreStoriesRequested(true)}
+            onClick={() => fetchMoreStories()}
             disabled={loadingMore}
             style={{ 'margin': '10px 20px 40px 40px' }}
           >
@@ -56,7 +56,7 @@ export const Headlines: React.FC<Props> = ({
         </div>
       ) : (
         <button
-          onClick={() => setMoreStoriesRequested(true)}
+          onClick={() => fetchMoreStories()}
           disabled={loadingMore}
           style={{ 'margin': '20px 20px 40px 40px' }}
         >
