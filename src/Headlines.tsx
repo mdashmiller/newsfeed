@@ -7,38 +7,37 @@ interface Story {
 }
 
 interface Props {
-  stories: Story[],
+  storyData: Story[],
   initialLoading: boolean,
   initialLoadError: boolean,
+  fetchMoreStories: any, // TODO: set as a type: function
   loadingMore: boolean,
   loadingMoreError: boolean,
-  fetchMoreStories: any // TODO: declare funtion as prop in ts
 }
 
 export const Headlines: React.FC<Props> = ({
-  stories,
+  storyData: stories,
   initialLoading,
   initialLoadError,
+  fetchMoreStories,
   loadingMore,
-  loadingMoreError,
-  fetchMoreStories
+  loadingMoreError
 }) => {
-
   const buttonText = loadingMore ? 'Loading...' : 'Load More Stories'
 
-  if (initialLoading) return <div>Loading...</div>
+  if (initialLoading) return <div data-testid="loading-message">Loading...</div>
 
-  if (initialLoadError) return <div>Something went wrong :(</div>
+  if (initialLoadError) return <div data-testid="init-error">Something went wrong :(</div>
 
   return (
     <div>
       <ul>
         {!!stories && stories.map(story =>
-          <a href={story.url} key={story.id} target="_blank" rel="noopener noreferrer">
-            <li data-testid="list-item">
+          <li data-testid="headline" key={story.id}>
+            <a href={story.url} target="_blank" rel="noopener noreferrer">
               {story.title}
-            </li>
-          </a>
+            </a>
+          </li>
         )}
       </ul>
       {loadingMoreError ? (

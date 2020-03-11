@@ -1,19 +1,43 @@
 import React from 'react'
 // import { render } from '@testing-library/react'
-// import { List } from './List'
+// import { Headlines } from './Headlines'
 
-// describe('List rendering', () => {
+// describe('Headlines rendering', () => {
 
-//   // creates testable list prop
-//   const list = [
-//     { id: 1, title: 'Title 1'},
-//     { id: 2, title: 'Title 2'},
-//     { id: 3, title: 'Title 3'},
-//   ]
+//   // creates testable props
+//   const props = {
+//     stories: [
+//       {
+//         id: 1,
+//         title: 'Title 1',
+//         url: 'url_1'
+//       },
+//       {
+//         id: 2,
+//         title: 'Title 2',
+//         url: 'url_2'
+//       },
+//       {
+//         id: 3,
+//         title: 'Title 3',
+//         url: 'url_3'
+//       }
+//     ],
+//     initialLoading: false,
+//     initialLoadError: false,
+//     fetchMoreStories: () => {},
+//     loadingMore: false,
+//     loadingMoreError: false,
+//   }
   
 //   it('receives props and renders list', () => {
 //     // renders List component with a test prop
-//     const { getAllByTestId } = render(<List stories={list} />)
+//     const { getByTestId } = render(
+//       <Headlines
+//         stories={props.stories}
+
+//       />
+//     )
 
 //     // expects List component to render each item from list array
 //     // in an li tag with correct text content
