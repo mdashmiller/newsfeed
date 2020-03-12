@@ -25,7 +25,7 @@ export const Headlines: React.FC<Props> = ({
 }) => {
   const buttonText = loadingMore ? 'Loading...' : 'Load More Stories'
 
-  if (initialLoading) return <div data-testid="loading-message">Loading...</div>
+  if (initialLoading) return <div data-testid="init-loading">Loading...</div>
 
   if (initialLoadError) return <div data-testid="init-error">Something went wrong :(</div>
 
@@ -33,7 +33,7 @@ export const Headlines: React.FC<Props> = ({
     <div>
       <ul>
         {!!stories && stories.map(story =>
-          <li data-testid="headline" key={story.id}>
+          <li data-testid={`headline-${story.id}`} key={story.id}>
             <a href={story.url} target="_blank" rel="noopener noreferrer">
               {story.title}
             </a>
@@ -55,6 +55,7 @@ export const Headlines: React.FC<Props> = ({
         </div>
       ) : (
         <button
+          data-testid={loadingMore ? 'more-loading' : 'load-more'}
           onClick={() => fetchMoreStories()}
           disabled={loadingMore}
           style={{ 'margin': '20px 20px 40px 40px' }}

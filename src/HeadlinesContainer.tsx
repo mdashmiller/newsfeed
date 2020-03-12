@@ -55,7 +55,7 @@ export const HeadlinesContainer: React.FC = () => {
 
     nextIds.forEach(async id => {
       try {
-        const nextStoryData = await axios(`${SINGLE_STORY_URL}${id}.json`)
+        const nextStoryData = await axios.get(`${SINGLE_STORY_URL}${id}.json`)
         const editedStoryData: Story = {
           id: nextStoryData.data.id,
           title: nextStoryData.data.title,
