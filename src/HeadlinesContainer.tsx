@@ -47,23 +47,28 @@ export const HeadlinesContainer: React.FC = () => {
     dispatch({ type: 'FETCH_MORE_INIT' })
 
     const nextIds: number[] = headlinesData.newStoriesIds.slice(
-      headlinesData.numStoriesLastReq,
-      headlinesData.numStoriesLastReq + 10
+      headlinesData.totalStoriesRequested,
+      headlinesData.totalStoriesRequested + 10
     )
     const nextStories: Story[] = []
     let counter = 10
 
+    // TODO: change out forEach for something that you can
+    // break out of if the server is unresponsive
     nextIds.forEach(async id => {
       try {
         const nextStoryData = await axios.get(`${SINGLE_STORY_URL}${id}.json`)
-        const editedStoryData: Story = {
-          id: nextStoryData.data.id,
-          title: nextStoryData.data.title,
-          url: nextStoryData.data.url
-        }
+       
+        if (nextStoryData) {
+          const editedStoryData: Story = {
+            id: nextStoryData.data.id,
+            title: nextStoryData.data.title,
+            url: nextStoryData.data.url
+          }
 
-        nextStories.push(editedStoryData)
-        counter--
+          nextStories.push(editedStoryData)
+          counter--
+        }
 
         if (counter === 0) {
           dispatch({
@@ -75,14 +80,16 @@ export const HeadlinesContainer: React.FC = () => {
         // trigger conditional error render in <Healines />
         // only for 5XX category status codes
         if (err.response && err.response.status > 499) {
+          console.log(err)
+
           dispatch({ type: 'FETCH_MORE_FAILURE' })
+        } else {
+          console.log(err)
+
+          counter--
         }
 
         // TODO: handle a network error
-
-        counter--
-
-        console.log(err)
       }
     })
   }

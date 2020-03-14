@@ -11,7 +11,7 @@ interface State {
   initialLoadError: boolean,
   loadingMore: boolean,
   loadingMoreError: boolean,
-  numStoriesLastReq: number
+  totalStoriesRequested: number
 }
 
 interface MountFetchInit {
@@ -55,7 +55,7 @@ export const headlinesInitialState: State = {
   initialLoadError: false,
   loadingMore: false,
   loadingMoreError: false,
-  numStoriesLastReq: 0
+  totalStoriesRequested: 0
 }
 
 export const headlinesFetchReducer = (state: State, action: Actions): State => {
@@ -72,7 +72,7 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
         newStoriesIds: action.payload.storyIds,
         storyData: action.payload.storyData,
         initialLoading: false,
-        numStoriesLastReq: 1
+        totalStoriesRequested: 1
       }
     case 'MOUNT_FETCH_FAILURE':
       return {
@@ -91,7 +91,7 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
         ...state,
         storyData: [...state.storyData, ...action.payload],
         loadingMore: false,
-        numStoriesLastReq: state.numStoriesLastReq + 10
+        totalStoriesRequested: state.totalStoriesRequested + 10
       }
     case 'FETCH_MORE_FAILURE':
       return {

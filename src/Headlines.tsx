@@ -41,11 +41,12 @@ export const Headlines: React.FC<Props> = ({
         )}
       </ul>
       {loadingMoreError ? (
-        <div>
+        <div data-testid="load-more-error">
           <p style={{ 'margin': '40px 20px 0px 40px', 'color': 'red' }}>
             Something went wrong :(
           </p>
           <button
+            data-testid="try-again"
             onClick={() => fetchMoreStories()}
             disabled={loadingMore}
             style={{ 'margin': '10px 20px 40px 40px' }}

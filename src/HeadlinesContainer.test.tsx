@@ -14,12 +14,16 @@ describe('HeadlinesContainer data fetching and rendering', () => {
 
     // mock data to resolve from Hackernews API
     const listOfIds = {
-      data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+      data: [
+        0, 1, 2, 3, 4, 5, 6, 
+        7, 8, 9, 10, 11, 12, 
+        13, 14, 15, 16, 17, 18, 19, 20
+      ]
     }
     const topStoryData = {
       data: {
         id: 0,
-        title: 'Test Title',
+        title: 'Test Headline',
         url: 'test_url_0'
       }
     }
@@ -60,21 +64,29 @@ describe('HeadlinesContainer data fetching and rendering', () => {
       return {
         data: {
           id: int,
-          title: `Test Title`,
+          title: `Test Headline`,
           url: `test_url_${int}`
         }
       }
     }
 
-    // mocking the api calls to fetch the
-    // next 10 stories
-    mockedAxios.get.mockReset()
+    // creates mock resolved values from Hackernews API for a 
+    // specified number of stories
+    const fetchMoreStoriesMock = (
+      currentNumOfStories: number, 
+      howManyMore: number
+    ) => {
+      mockedAxios.get.mockReset()
 
-    for (let i = 1; i < 11; i++) {
-      mockedAxios.get.mockResolvedValueOnce(fakeStoryMaker(i))
+      for (
+        let i = currentNumOfStories; i < currentNumOfStories + howManyMore; i++
+      ) {
+        mockedAxios.get.mockResolvedValueOnce(fakeStoryMaker(i))
+      }
     }
 
     // simulate user clicking 'Load More Stories' button
+    fetchMoreStoriesMock(1, 10)
     fireEvent.click(getByTestId('load-more'))
 
     // 'Load More Stories' button should be disabled and
@@ -85,7 +97,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     // wait until the last headline renders and
     // test that there are now 11 total
     await waitForElement(() => getByTestId(`headline-10`))
-      .then(() => getAllByText('Test Title'))
+      .then(() => getAllByText('Test Headline'))
       .then(headlines => {
         expect(headlines.length).toBe(11)
         expect(mockedAxios.get).toHaveBeenCalledTimes(10)
@@ -95,7 +107,48 @@ describe('HeadlinesContainer data fetching and rendering', () => {
       })
       .catch(err => console.log(err))
 
-      // TODO: add test for loadMoreError
+    // this last section tests for proper error handling
+    // when user clicks 'Load More Stories' button
+
+    mockedAxios.get.mockReset()
+    mockedAxios.get.mockRejectedValue({ response: { status: 500 } })
+
+    fireEvent.click(getByTestId('load-more'))
+
+    // only 5XX status errors should render the
+    // 'load-more-error' element
+    await waitForElement(() => getByTestId('load-more-error'))
+      .then(errorEl => {
+        expect(errorEl).toBeInTheDocument()
+        // 'Load More Stories' button should switch
+        // to 'Try Again'
+        expect(getByTestId('try-again')).toBeInTheDocument()
+        expect(queryByTestId('load-more')).not.toBeInTheDocument()
+      })
+      .catch(err => console.log(err))
+    
+    // user can then click 'Try Again' to attempt to
+    // fetch more stories again
+    fetchMoreStoriesMock(11, 10)
+    fireEvent.click(getByTestId('try-again'))
+
+    // button should be disabled and
+    // display loading text when clicked
+    expect(getByTestId('more-loading')).toBeInTheDocument()
+    expect(getByTestId('more-loading')).toHaveAttribute('disabled')
+    
+    // wait until the last headline renders and
+    // test that there are now 21 total
+    await waitForElement(() => getByTestId('headline-20'))
+      .then(() => getAllByText('Test Headline'))
+      .then(headlines => {
+        expect(headlines.length).toBe(21)
+        expect(mockedAxios.get).toHaveBeenCalledTimes(10)
+        expect(queryByTestId('more-loading')).not.toBeInTheDocument()
+        expect(getByTestId('load-more')).toBeInTheDocument()
+        expect(getByTestId('load-more')).not.toHaveAttribute('disabled')
+      })
+      .catch(err => console.log(err))
   })
 
   it('renders error when fetch fails on mount', async () => {
