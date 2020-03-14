@@ -16,6 +16,7 @@ export const HeadlinesContainer: React.FC = () => {
   const [headlinesData, dispatch] = useReducer(headlinesFetchReducer, headlinesInitialState)
 
   useEffect(() => {
+    // sets the most recent headline on mount
     const fetchTopStory = async () => {
       dispatch({ type: 'MOUNT_FETCH_INIT' })
 
@@ -43,7 +44,11 @@ export const HeadlinesContainer: React.FC = () => {
     fetchTopStory()
   }, [])
 
-  const fetchMoreStories = () => {
+  // gets the next ten story ids from the list of the most
+  // recent 500 (newStoryIds) in state and loops through
+  // them using each to make an api call to the
+  // single-story endpoint for that id
+  const fetchMoreStories = async () => {
     dispatch({ type: 'FETCH_MORE_INIT' })
 
     const nextIds: number[] = headlinesData.newStoriesIds.slice(
@@ -53,12 +58,14 @@ export const HeadlinesContainer: React.FC = () => {
     const nextStories: Story[] = []
     let counter = 10
 
-    // TODO: change out forEach for something that you can
-    // break out of if the server is unresponsive
-    nextIds.forEach(async id => {
+    for (let id of nextIds) {
+      // if server is unresponsive, counter is set
+      // to -1 to prevent unecessary api calls
+      if (counter === -1) break
+
       try {
         const nextStoryData = await axios.get(`${SINGLE_STORY_URL}${id}.json`)
-       
+
         if (nextStoryData) {
           const editedStoryData: Story = {
             id: nextStoryData.data.id,
@@ -77,21 +84,23 @@ export const HeadlinesContainer: React.FC = () => {
           })
         }
       } catch (err) {
-        // trigger conditional error render in <Healines />
-        // only for 5XX category status codes
+        // trigger conditional error render in <Healines /> and
+        // break from loop only for 5XX category status codes
         if (err.response && err.response.status > 499) {
           console.log(err)
 
           dispatch({ type: 'FETCH_MORE_FAILURE' })
+
+          counter = -1
         } else {
+          // for all other errors, continue looping though the
+          // remaining story ids
           console.log(err)
 
           counter--
         }
-
-        // TODO: handle a network error
       }
-    })
+    }
   }
 
   return (

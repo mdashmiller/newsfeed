@@ -10,7 +10,7 @@ interface Props {
   storyData: Story[],
   initialLoading: boolean,
   initialLoadError: boolean,
-  fetchMoreStories: any, // TODO: set as a type: function
+  fetchMoreStories: any, // TODO: change to function type
   loadingMore: boolean,
   loadingMoreError: boolean,
 }
@@ -25,9 +25,9 @@ export const Headlines: React.FC<Props> = ({
 }) => {
   const buttonText = loadingMore ? 'Loading...' : 'Load More Stories'
 
-  if (initialLoading) return <div data-testid="init-loading">Loading...</div>
+  if (initialLoading) return <div data-testid="initial-loading">Loading...</div>
 
-  if (initialLoadError) return <div data-testid="init-error">Something went wrong :(</div>
+  if (initialLoadError) return <div data-testid="initial-error">Something went wrong :(</div>
 
   return (
     <div>

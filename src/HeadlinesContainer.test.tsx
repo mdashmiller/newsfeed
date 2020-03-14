@@ -8,11 +8,11 @@ const mockedAxios = axios as jest.Mocked<typeof axios>
 
 describe('HeadlinesContainer data fetching and rendering', () => {
 
-  it('renders loading message and data correctly', async () => {
+  it('renders loading, error and data correctly', async () => {
     // this first set of tests covers the fetching and
     // rendering of the component on mount
 
-    // mock data to resolve from Hackernews API
+    // mock data to resolve the get from Hackernews API
     const listOfIds = {
       data: [
         0, 1, 2, 3, 4, 5, 6, 
@@ -36,14 +36,14 @@ describe('HeadlinesContainer data fetching and rendering', () => {
 
     // component should display an initial
     // loading message on mount
-    expect(getByTestId('init-loading')).toBeInTheDocument()
+    expect(getByTestId('initial-loading')).toBeInTheDocument()
     expect(queryByTestId('headline-0')).not.toBeInTheDocument()
 
-    // wait for data from axios to render as 'headline-0'
+    // wait for data from axios.get to render as 'headline-0'
     await waitForElement(() => getByTestId('headline-0'))
       .then(() => {
         expect(mockedAxios.get).toHaveBeenCalledTimes(2)
-        expect(queryByTestId('init-loading')).not.toBeInTheDocument()
+        expect(queryByTestId('initial-loading')).not.toBeInTheDocument()
       })
       .catch(err => console.log(err))
 
@@ -95,7 +95,9 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     expect(getByTestId('more-loading')).toHaveAttribute('disabled')
 
     // wait until the last headline renders and
-    // test that there are now 11 total
+    // test that there are now 11 total and that
+    // the 'Load More Stories' button is ready
+    // to be clicked again
     await waitForElement(() => getByTestId(`headline-10`))
       .then(() => getAllByText('Test Headline'))
       .then(headlines => {
@@ -111,7 +113,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     // when user clicks 'Load More Stories' button
 
     mockedAxios.get.mockReset()
-    mockedAxios.get.mockRejectedValue({ response: { status: 500 } })
+    mockedAxios.get.mockRejectedValueOnce({ response: { status: 500 } })
 
     fireEvent.click(getByTestId('load-more'))
 
@@ -158,15 +160,15 @@ describe('HeadlinesContainer data fetching and rendering', () => {
 
     const { getByTestId, queryByTestId } = render(<HeadlinesContainer />)
 
-    expect(getByTestId('init-loading')).toBeInTheDocument()
+    expect(getByTestId('initial-loading')).toBeInTheDocument()
     expect(queryByTestId('headline-0')).not.toBeInTheDocument()
 
     // once initial fetch has resolved with an error the 
-    // component should render 'init-error' and 
-    // 'init-loading' should disappear 
-    await waitForElement(() => getByTestId('init-error'))
+    // component should render 'initial-error' and 
+    // 'initial-loading' should disappear 
+    await waitForElement(() => getByTestId('initial-error'))
       .then(() => {
-        expect(queryByTestId('init-loading')).not.toBeInTheDocument()
+        expect(queryByTestId('initial-loading')).not.toBeInTheDocument()
         expect(queryByTestId('headline-0')).not.toBeInTheDocument()
       })
       .catch(err => console.log(err))
