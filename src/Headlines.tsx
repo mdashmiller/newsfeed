@@ -10,9 +10,9 @@ interface Props {
   storyData: Story[],
   initialLoading: boolean,
   initialLoadError: boolean,
-  fetchMoreStories: any, // TODO: change to function type
+  fetchMoreStories(): any,
   loadingMore: boolean,
-  loadingMoreError: boolean,
+  loadingMoreError: boolean
 }
 
 export const Headlines: React.FC<Props> = ({

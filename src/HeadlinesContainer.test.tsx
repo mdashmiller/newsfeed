@@ -1,6 +1,6 @@
 import React from 'react'
 import { HeadlinesContainer } from './HeadlinesContainer'
-import { render, waitForElement, fireEvent } from '@testing-library/react'
+import { render, waitFor, fireEvent } from '@testing-library/react'
 import axios from 'axios'
 
 jest.mock('axios')
@@ -40,7 +40,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     expect(queryByTestId('headline-0')).not.toBeInTheDocument()
 
     // wait for data from axios.get to render as 'headline-0'
-    await waitForElement(() => getByTestId('headline-0'))
+    await waitFor(() => getByTestId('headline-0'))
       .then(() => {
         expect(mockedAxios.get).toHaveBeenCalledTimes(2)
         expect(queryByTestId('initial-loading')).not.toBeInTheDocument()
@@ -98,7 +98,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     // test that there are now 11 total and that
     // the 'Load More Stories' button is ready
     // to be clicked again
-    await waitForElement(() => getByTestId(`headline-10`))
+    await waitFor(() => getByTestId(`headline-10`))
       .then(() => getAllByText('Test Headline'))
       .then(headlines => {
         expect(headlines.length).toBe(11)
@@ -119,7 +119,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
 
     // only 5XX status errors should render the
     // 'load-more-error' element
-    await waitForElement(() => getByTestId('load-more-error'))
+    await waitFor(() => getByTestId('load-more-error'))
       .then(errorEl => {
         expect(errorEl).toBeInTheDocument()
         // 'Load More Stories' button should switch
@@ -141,7 +141,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     
     // wait until the last headline renders and
     // test that there are now 21 total
-    await waitForElement(() => getByTestId('headline-20'))
+    await waitFor(() => getByTestId('headline-20'))
       .then(() => getAllByText('Test Headline'))
       .then(headlines => {
         expect(headlines.length).toBe(21)
@@ -158,7 +158,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
       Promise.reject(new Error())
     )
 
-    const { getByTestId, queryByTestId } = render(<HeadlinesContainer />)
+    const { getByTestId, findByTestId, queryByTestId } = render(<HeadlinesContainer />)
 
     expect(getByTestId('initial-loading')).toBeInTheDocument()
     expect(queryByTestId('headline-0')).not.toBeInTheDocument()
@@ -166,7 +166,7 @@ describe('HeadlinesContainer data fetching and rendering', () => {
     // once initial fetch has resolved with an error the 
     // component should render 'initial-error' and 
     // 'initial-loading' should disappear 
-    await waitForElement(() => getByTestId('initial-error'))
+    await waitFor(() => findByTestId('initial-error'))
       .then(() => {
         expect(queryByTestId('initial-loading')).not.toBeInTheDocument()
         expect(queryByTestId('headline-0')).not.toBeInTheDocument()
