@@ -5,99 +5,92 @@ interface Story {
 }
 
 interface State {
-  newStoriesIds: number[],
+  listOfStoryIds: number[],
   storyData: Story[],
-  initialLoading: boolean,
-  initialLoadError: boolean,
-  loadingMore: boolean,
-  loadingMoreError: boolean,
+  loadingIds: boolean,
+  loadingStories: boolean,
+  loadingIdsError: boolean,
+  loadingStoriesError: boolean,
   totalStoriesRequested: number
 }
 
-interface MountFetchInit {
-  readonly type: 'MOUNT_FETCH_INIT'
+interface fetchIdsInit {
+  readonly type: 'FETCH_IDS_INIT'
 }
 
-interface MountFetchPayload {
-  storyIds: number[],
-  storyData: Story[]
+interface fetchIdsSuccess {
+  readonly type: 'FETCH_IDS_SUCCESS'
+  readonly payload: number[]
 }
 
-interface MountFetchSuccess {
-  readonly type: 'MOUNT_FETCH_SUCCESS',
-  readonly payload: MountFetchPayload
+interface fetchIdsFailure {
+  readonly type: 'FETCH_IDS_FAILURE'
 }
 
-interface MountFetchFailure {
-  readonly type: 'MOUNT_FETCH_FAILURE'
+interface fetchStoriesInit {
+  readonly type: 'FETCH_STORIES_INIT'
 }
 
-interface FetchMoreInit {
-  readonly type: 'FETCH_MORE_INIT'
-}
-
-interface FetchMoreSuccess {
-  readonly type: 'FETCH_MORE_SUCCESS',
+interface fetchStoriesSuccess {
+  readonly type: 'FETCH_STORIES_SUCCESS',
   readonly payload: Story[]
 }
 
-interface FetchMoreFailure {
-  readonly type: 'FETCH_MORE_FAILURE'
+interface fetchStoriesFailure {
+  readonly type: 'FETCH_STORIES_FAILURE'
 }
 
-type Actions = MountFetchInit | MountFetchSuccess | MountFetchFailure |
-  FetchMoreInit | FetchMoreSuccess | FetchMoreFailure
+type Actions = fetchIdsInit | fetchIdsSuccess | fetchIdsFailure |
+  fetchStoriesInit | fetchStoriesSuccess | fetchStoriesFailure
 
 export const headlinesInitialState: State = {
-  newStoriesIds: [],
+  listOfStoryIds: [],
   storyData: [],
-  initialLoading: false,
-  initialLoadError: false,
-  loadingMore: false,
-  loadingMoreError: false,
+  loadingIds: false,
+  loadingStories: false,
+  loadingIdsError: false,
+  loadingStoriesError: false,
   totalStoriesRequested: 0
 }
 
 export const headlinesFetchReducer = (state: State, action: Actions): State => {
   switch (action.type) {
-    case 'MOUNT_FETCH_INIT':
+    case 'FETCH_IDS_INIT':
       return {
         ...state,
-        initialLoading: true,
-        initialLoadError: false
+        loadingIds: true,
+        loadingIdsError: false
       }
-    case 'MOUNT_FETCH_SUCCESS':
+    case 'FETCH_IDS_SUCCESS':
       return {
         ...state,
-        newStoriesIds: action.payload.storyIds,
-        storyData: action.payload.storyData,
-        initialLoading: false,
-        totalStoriesRequested: 1
+        listOfStoryIds: action.payload,
+        loadingIds: false
       }
-    case 'MOUNT_FETCH_FAILURE':
+    case 'FETCH_IDS_FAILURE':
       return {
         ...state,
-        initialLoadError: true,
-        initialLoading: false
+        loadingIdsError: true,
+        loadingIds: false
       }
-    case 'FETCH_MORE_INIT':
+    case 'FETCH_STORIES_INIT':
       return {
         ...state,
-        loadingMore: true,
-        loadingMoreError: false
+        loadingStories: true,
+        loadingStoriesError: false
       }
-    case 'FETCH_MORE_SUCCESS':
+    case 'FETCH_STORIES_SUCCESS':
       return {
         ...state,
         storyData: [...state.storyData, ...action.payload],
-        loadingMore: false,
-        totalStoriesRequested: state.totalStoriesRequested + 10
+        loadingStories: false,
+        totalStoriesRequested: state.totalStoriesRequested + 50
       }
-    case 'FETCH_MORE_FAILURE':
+    case 'FETCH_STORIES_FAILURE':
       return {
         ...state,
-        loadingMoreError: true,
-        loadingMore: false
+        loadingStoriesError: true,
+        loadingStories: false
       }
     default:
       throw new Error('reached default case')
