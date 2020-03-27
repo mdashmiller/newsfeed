@@ -19,11 +19,12 @@ export const Headlines: React.FC = () => {
     loadingStoriesError,
     loadingIds,
     loadingIdsError,
-    totalStoriesRequested
+    totalStoriesRequested,
+    endOfList
   }, dispatch] = useReducer(headlinesFetchReducer, headlinesInitialState)
-  // refObject will store loader element at end of headlines list which will be
+  // refObject will store getMoreHeadlines div at end of headlines list which will be
   // used with Intersection Observer to trigger get reqs for infinite scroll
-  const loader = useRef<HTMLDivElement>(null)
+  const getMoreHeadlines = useRef<HTMLDivElement>(null)
 
   // fetch the ids of the most recent 500
   // stories from hackernews api on mount
@@ -48,7 +49,7 @@ export const Headlines: React.FC = () => {
 
   // use listOfStoryIds in state to fetch data for first 50 individual stories on
   // mount and 50 more each time the user scrolls to the end of the list of headlines
-  // by tracking intersection of loader in the viewport
+  // by tracking intersection of getMoreHeadlines in the viewport
   const fetchStories: IntersectionObserverCallback = useCallback(async entries => {
     // set loading indicator as target
     const target = entries[0]
@@ -73,7 +74,8 @@ export const Headlines: React.FC = () => {
         totalStoriesRequested + 50
       )
 
-      // TODO: handle reaching end of listOfStoryIds
+      // prevent superfluous api calls when current listOfIds is exhausted
+      if (nextSublistOfIds.length === 0) return dispatch({ type: 'END_OF_LIST' })
 
       for (let id of nextSublistOfIds) {
         // if server is unresponsive, counter will be set
@@ -127,12 +129,12 @@ export const Headlines: React.FC = () => {
   }, [listOfStoryIds, totalStoriesRequested])
 
   useEffect(() => {
-    // create an observer to watch for when the loading
-    // indicator appears in the viewport
+    // create an observer to watch for when the
+    // getMoreHeadlines div appears in the viewport
     const observer = new IntersectionObserver(fetchStories)
 
-    if (loader && loader.current) {
-      observer.observe(loader.current)
+    if (getMoreHeadlines && getMoreHeadlines.current) {
+      observer.observe(getMoreHeadlines.current)
     }
 
     // unobserve on willUnmount
@@ -155,18 +157,23 @@ export const Headlines: React.FC = () => {
           </li>
         )}
       </ul>
-      {loadingStoriesError ? (
-        <>
-          <p>Something went wrong... :(</p>
-          <button>Try Again?</button>
-          {/* TODO: add onClick fetchStories */}
-        </>
+      {endOfList ? (
+        null
       ) : (
-        loadingStories ? (
-          <div>Loading...</div>
+        loadingStoriesError ? (
+          <>
+            <p>Something went wrong... :(</p>
+            {/* FETCH_STORIES_RETRY simply sets loadingStoriesError back to false so that the getMoreHeadlines
+            div will render, thus triggering the IntersectionObserver fetchStories callback again */}
+            <button onClick={() => dispatch({ type: 'FETCH_STORIES_RETRY' })}>Try Again?</button>
+          </>
         ) : (
-          <div ref={loader}>END OF LIST</div>
-          // TODO: replace with loader icon
+          loadingStories ? (
+            // TODO: replace with loader icon
+            <div>Loading...</div>
+          ) : (
+            <div ref={getMoreHeadlines}></div>
+          )
         )
       )}
     </section>

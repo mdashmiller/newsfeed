@@ -11,7 +11,8 @@ interface State {
   loadingStories: boolean,
   loadingIdsError: boolean,
   loadingStoriesError: boolean,
-  totalStoriesRequested: number
+  totalStoriesRequested: number,
+  endOfList: boolean
 }
 
 interface fetchIdsInit {
@@ -40,8 +41,16 @@ interface fetchStoriesFailure {
   readonly type: 'FETCH_STORIES_FAILURE'
 }
 
-type Actions = fetchIdsInit | fetchIdsSuccess | fetchIdsFailure |
-  fetchStoriesInit | fetchStoriesSuccess | fetchStoriesFailure
+interface fetchStoriesRetry {
+  readonly type: 'FETCH_STORIES_RETRY'
+}
+
+interface endOfList {
+  readonly type: 'END_OF_LIST'
+}
+
+type Actions = fetchIdsInit | fetchIdsSuccess | fetchIdsFailure | fetchStoriesInit | 
+  fetchStoriesSuccess | fetchStoriesFailure | fetchStoriesRetry | endOfList
 
 export const headlinesInitialState: State = {
   listOfStoryIds: [],
@@ -50,7 +59,8 @@ export const headlinesInitialState: State = {
   loadingStories: false,
   loadingIdsError: false,
   loadingStoriesError: false,
-  totalStoriesRequested: 0
+  totalStoriesRequested: 0,
+  endOfList: false
 }
 
 export const headlinesFetchReducer = (state: State, action: Actions): State => {
@@ -59,7 +69,8 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
       return {
         ...state,
         loadingIds: true,
-        loadingIdsError: false
+        loadingIdsError: false,
+        endOfList: false
       }
     case 'FETCH_IDS_SUCCESS':
       return {
@@ -91,6 +102,17 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
         ...state,
         loadingStoriesError: true,
         loadingStories: false
+      }
+    case 'FETCH_STORIES_RETRY':
+      return {
+        ...state,
+        loadingStoriesError: false
+      }
+    case 'END_OF_LIST' :
+      return {
+        ...state,
+        loadingStories: false,
+        endOfList: true
       }
     default:
       throw new Error('reached default case')
