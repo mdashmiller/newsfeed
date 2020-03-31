@@ -12,7 +12,7 @@ interface State {
   loadingIdsError: boolean,
   loadingStoriesError: boolean,
   totalStoriesRequested: number,
-  endOfList: boolean
+  endOfIdsList: boolean
 }
 
 interface fetchIdsInit {
@@ -60,7 +60,7 @@ export const headlinesInitialState: State = {
   loadingIdsError: false,
   loadingStoriesError: false,
   totalStoriesRequested: 0,
-  endOfList: false
+  endOfIdsList: false
 }
 
 export const headlinesFetchReducer = (state: State, action: Actions): State => {
@@ -70,7 +70,7 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
         ...state,
         loadingIds: true,
         loadingIdsError: false,
-        endOfList: false
+        endOfIdsList: false
       }
     case 'FETCH_IDS_SUCCESS':
       return {
@@ -112,7 +112,7 @@ export const headlinesFetchReducer = (state: State, action: Actions): State => {
       return {
         ...state,
         loadingStories: false,
-        endOfList: true
+        endOfIdsList: true
       }
     default:
       throw new Error('reached default case')

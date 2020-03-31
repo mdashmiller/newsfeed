@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 // import { render } from '@testing-library/react'
 // import { Headlines } from './Headlines'
 
@@ -48,7 +48,6 @@ import React from 'react'
 //   })
 
 // })
-
 it('is true', () => {
   expect(true).toBe(true)
 })

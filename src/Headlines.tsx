@@ -1,27 +1,28 @@
-import React, { useEffect, useReducer, useCallback, useRef } from 'react'
+import React, { useEffect, useReducer, useRef } from 'react'
 import axios from 'axios'
 import { headlinesFetchReducer, headlinesInitialState } from './headlinesFetchReducer'
+import { useFetchStories } from './useFetchStories'
 
-const SINGLE_STORY_URL = 'https://hacker-news.firebaseio.com/v0/item/'
 const NEW_STORIES_URL = 'https://hacker-news.firebaseio.com/v0/newstories.json'
 
-interface Story {
-  id: number,
-  title: string | null,
-  url?: string
-}
-
 export const Headlines: React.FC = () => {
-  const [{
-    listOfStoryIds,
+  const [
+    {
+      listOfStoryIds,
+      loadingIds,
+      loadingIdsError
+    }, 
+    dispatch
+  ] = useReducer(headlinesFetchReducer, headlinesInitialState)
+
+  const { 
+    fetchStories,
     storyData,
-    loadingStories,
+    loadingStories, 
     loadingStoriesError,
-    loadingIds,
-    loadingIdsError,
-    totalStoriesRequested,
-    endOfList
-  }, dispatch] = useReducer(headlinesFetchReducer, headlinesInitialState)
+    endOfIdsList
+  } = useFetchStories(listOfStoryIds)
+
   // refObject will store getMoreHeadlines div at end of headlines list which will be
   // used with Intersection Observer to trigger get reqs for infinite scroll
   const getMoreHeadlines = useRef<HTMLDivElement>(null)
@@ -47,87 +48,6 @@ export const Headlines: React.FC = () => {
     fetchListOfIds()
   }, [])
 
-  // use listOfStoryIds in state to fetch data for first 50 individual stories on
-  // mount and 50 more each time the user scrolls to the end of the list of headlines
-  // by tracking intersection of getMoreHeadlines in the viewport
-  const fetchStories: IntersectionObserverCallback = useCallback(async entries => {
-    // set loading indicator as target
-    const target = entries[0]
-
-    if (target.isIntersecting) {
-      // this section loops through the next 50 story ids and makes
-      // a get req for the individual story data for each id
-      dispatch({ type: 'FETCH_STORIES_INIT' })
-      // create an array to hold the individual story data
-      // response objects so when the loop completes they
-      // can be set in state with a single dispatch
-      const nextStories: Story[] = []
-      // the counter will be used to trigger a dispatch after a 
-      // get req has been made for each id, as well as to
-      // exit the loop in the event of certain errors
-      let counter = 50
-
-      // creates a sublist of the next 50 ids from the listOfStoryIds
-      // starting from the index of the last story requested + 1
-      const nextSublistOfIds = listOfStoryIds.slice(
-        totalStoriesRequested,
-        totalStoriesRequested + 50
-      )
-
-      // prevent superfluous api calls when current listOfIds is exhausted
-      if (nextSublistOfIds.length === 0) return dispatch({ type: 'END_OF_LIST' })
-
-      for (let id of nextSublistOfIds) {
-        // if server is unresponsive, counter will be set
-        // to -1 to prevent unecessary api calls
-        if (counter === -1) break
-
-        try {
-          const nextStoryData = await axios.get(`${SINGLE_STORY_URL}${id}.json`)
-
-          if (nextStoryData) {
-            // format the response
-            const editedStoryData: Story = {
-              id: nextStoryData.data.id,
-              title: nextStoryData.data.title,
-              url: nextStoryData.data.url
-            }
-
-            // for each successful fetch, push the story to the
-            // temporary holding array and decrement counter 
-            nextStories.push(editedStoryData)
-            counter--
-          }
-
-          // success dispatch is sent only after all 50 ids
-          // have been looped through and no 5XX errors have occurred
-          if (counter === 0) {
-            dispatch({
-              type: 'FETCH_STORIES_SUCCESS',
-              payload: nextStories
-            })
-          }
-        } catch (err) {
-          // send error dispatch and break from loop
-          // only for 5XX category status codes
-          if (err.response && err.response.status > 499) {
-            console.log(err)
-
-            dispatch({ type: 'FETCH_STORIES_FAILURE' })
-
-            counter = -1
-          } else {
-            // for all other errors, continue looping though the
-            // remaining story ids
-            console.log(err)
-
-            counter--
-          }
-        }
-      }
-    }
-  }, [listOfStoryIds, totalStoriesRequested])
-
   useEffect(() => {
     // create an observer to watch for when the
     // getMoreHeadlines div appears in the viewport
@@ -141,10 +61,10 @@ export const Headlines: React.FC = () => {
     return () => observer.disconnect()
   }, [fetchStories])
 
-  if (loadingIds) return <div>Loading...</div>
+  if (loadingIds) return <div data-testid="loading-ids">Loading...</div>
 
-  if (loadingIdsError) return <div>Something went wrong :(</div>
-
+  if (loadingIdsError) return <div data-testid="ids-error">Something went wrong :(</div>
+  
   return (
     <section>
       <h2>News</h2>
@@ -157,7 +77,7 @@ export const Headlines: React.FC = () => {
           </li>
         )}
       </ul>
-      {endOfList ? (
+      {endOfIdsList ? (
         null
       ) : (
         loadingStoriesError ? (
@@ -172,7 +92,9 @@ export const Headlines: React.FC = () => {
             // TODO: replace with loader icon
             <div>Loading...</div>
           ) : (
-            <div ref={getMoreHeadlines}></div>
+            <div data-testid="end-of-list" id="end-of-list" ref={getMoreHeadlines}>
+              END OF BATCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            </div>
           )
         )
       )}
