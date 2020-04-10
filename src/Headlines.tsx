@@ -26,7 +26,7 @@ export const Headlines: React.FC = () => {
   // refObject will store getMoreHeadlines div at end of headlines list which will be
   // used with Intersection Observer to trigger get reqs for infinite scroll
   const getMoreHeadlines = useRef<HTMLDivElement>(null)
-
+    
   // fetch the ids of the most recent 500
   // stories from hackernews api on mount
   useEffect(() => {
@@ -47,7 +47,7 @@ export const Headlines: React.FC = () => {
 
     fetchListOfIds()
   }, [])
-
+ 
   useEffect(() => {
     // create an observer to watch for when the
     // getMoreHeadlines div appears in the viewport
@@ -92,7 +92,7 @@ export const Headlines: React.FC = () => {
             // TODO: replace with loader icon
             <div>Loading...</div>
           ) : (
-            <div data-testid="end-of-list" id="end-of-list" ref={getMoreHeadlines}>
+            <div data-testid="end-of-list" ref={getMoreHeadlines}>
               END OF BATCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             </div>
           )

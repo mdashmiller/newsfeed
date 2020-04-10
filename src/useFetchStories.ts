@@ -100,6 +100,6 @@ export const useFetchStories = (listOfStoryIds: number[]) => {
       }
     }
   }, [listOfStoryIds, totalStoriesRequested])
-  
+
   return { fetchStories, loadingStories, storyData, endOfIdsList, loadingStoriesError }
 }
